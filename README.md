@@ -3,6 +3,7 @@
 - Afonso Joao
 - Liane Kpocheme
 - Rita Cunha
+- Guilherme Carvalho
 ## Project Description
 Credit scoring bias analysis for DEGO course .
 ## Structure
