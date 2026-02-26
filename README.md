@@ -4,6 +4,7 @@
 - Liane Kpocheme
 - Rita Cunha
 - Guilherme Carvalho
+- Luca Benedict Illies
 ## Project Description
 Credit scoring bias analysis for DEGO course .
 ## Structure
