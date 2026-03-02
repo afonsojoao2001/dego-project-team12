@@ -1,0 +1,38 @@
+## Setup & Data Loading
+import json
+import pandas as pd
+import numpy as np
+from datetime import datetime, date
+
+# ── Load raw JSON ──────────────────────────────────────────────────────────────
+with open('../data/raw_credit_applications.json', 'r') as f:
+    raw = json.load(f)
+
+# ── Flatten nested structure into a flat DataFrame ────────────────────────────
+records = []
+for entry in raw:
+    record = {
+        '_id': entry.get('_id'),
+        # applicant_info
+        'full_name':            entry.get('applicant_info', {}).get('full_name'),
+        'email':                entry.get('applicant_info', {}).get('email'),
+        'ssn':                  entry.get('applicant_info', {}).get('ssn'),
+        'gender':               entry.get('applicant_info', {}).get('gender'),
+        'date_of_birth':        entry.get('applicant_info', {}).get('date_of_birth'),
+        'zip_code':             entry.get('applicant_info', {}).get('zip_code'),
+        # financials
+        'annual_income':        entry.get('financials', {}).get('annual_income'),
+        'credit_history_months':entry.get('financials', {}).get('credit_history_months'),
+        'debt_to_income':       entry.get('financials', {}).get('debt_to_income'),
+        'savings_balance':      entry.get('financials', {}).get('savings_balance'),
+        # decision
+        'loan_approved':        entry.get('decision', {}).get('loan_approved'),
+    }
+    records.append(record)
+
+df = pd.DataFrame(records)
+print(f'Rows: {len(df)}  |  Columns: {len(df.columns)}')
+df.head()
+
+##1 - UNIQENESS
+# 1a - Exact Duplicate Rows
