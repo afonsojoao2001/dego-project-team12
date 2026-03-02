@@ -34,5 +34,220 @@ df = pd.DataFrame(records)
 print(f'Rows: {len(df)}  |  Columns: {len(df.columns)}')
 df.head()
 
-##1 - UNIQENESS
+##1 - UNIQUENESS
 # 1a - Exact Duplicate Rows
+# Exact duplicates: every column is identical (including _id)
+exact_dupes = df[df.duplicated(keep=False)]
+
+print(f'Exact duplicate rows found: {len(exact_dupes)}')
+
+if not exact_dupes.empty:
+    display(exact_dupes.sort_values('_id'))
+
+
+# 1b — Logical Duplicates via SSN
+# Same SSN → same person, different _id
+ssn_dupes = df[df.duplicated(subset=['ssn'], keep=False)]
+
+print(f'Rows with a duplicate SSN: {len(ssn_dupes)}')
+
+if not ssn_dupes.empty:
+    display(
+        ssn_dupes[['_id', 'full_name', 'ssn', 'date_of_birth']]
+        .sort_values('ssn')
+    )
+
+# 1c - Logical Duplicates via Name + Date of Birth
+# Same full_name AND date_of_birth → almost certainly the same person
+name_dob_dupes = df[df.duplicated(subset=['full_name', 'date_of_birth'], keep=False)]
+
+print(f'Rows with duplicate name + DOB: {len(name_dob_dupes)}')
+
+if not name_dob_dupes.empty:
+    display(
+        name_dob_dupes[['_id', 'full_name', 'ssn', 'date_of_birth']]
+        .sort_values(['full_name', 'date_of_birth'])
+    )
+
+#1d — Remediation: Remove Duplicates (Strategy: keep the first occurrence, drop the rest.)
+before = len(df)
+
+df_clean = df.drop_duplicates(keep='first')
+
+df_clean = df_clean.drop_duplicates(subset=['ssn'], keep='first')
+
+df_clean = df_clean.drop_duplicates(subset=['full_name', 'date_of_birth'], keep='first')
+
+after = len(df_clean)
+print(f'Rows before: {before}  →  after dedup: {after}  ({before - after} removed)')
+
+## 2 - VALIDITY
+# 2a - Inconsistent Data Types
+# ── credit_history_months: should always be int ────────────────────────────────
+type_counts = df_clean['credit_history_months'].apply(type).value_counts()
+print('credit_history_months — type distribution:')
+print(type_counts)
+
+# Show rows where it is NOT an int
+bad_type_chm = df_clean[
+    df_clean['credit_history_months'].apply(lambda x: not isinstance(x, (int, float)) or (isinstance(x, float) and not x.is_integer()))
+]
+if not bad_type_chm.empty:
+    print('\nRows with unexpected credit_history_months type:')
+    display(bad_type_chm[['_id', 'full_name', 'credit_history_months']])
+
+# ── loan_approved: should be bool, not string ──────────────────────────────────
+la_type_counts = df_clean['loan_approved'].apply(type).value_counts()
+print('loan_approved — type distribution:')
+print(la_type_counts)
+
+# Show rows where it is a string (e.g. "maybe", "error", "yes")
+bad_loan = df_clean[df_clean['loan_approved'].apply(lambda x: isinstance(x, str))]
+if not bad_loan.empty:
+    print('\nRows with unexpected loan_approved value:')
+    display(bad_loan[['_id', 'full_name', 'loan_approved']])
+
+## 2b — Inconsistent Date Formats
+import re
+
+# Detect which format each date_of_birth uses
+def detect_date_format(val):
+    if pd.isna(val):
+        return 'missing'
+    val = str(val)
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', val):
+        return 'YYYY-MM-DD (ISO)'
+    if re.match(r'^\d{4}/\d{2}/\d{2}$', val):
+        return 'YYYY/MM/DD'
+    if re.match(r'^\d{2}/\d{2}/\d{4}$', val):
+        return 'DD/MM/YYYY'
+    if re.match(r'^\d{2}-\d{2}-\d{4}$', val):
+        return 'DD-MM-YYYY'
+    return 'unknown'
+
+df_clean = df_clean.copy()
+df_clean['dob_format'] = df_clean['date_of_birth'].apply(detect_date_format)
+
+print('date_of_birth format distribution:')
+print(df_clean['dob_format'].value_counts())
+
+# Show non-ISO rows
+non_iso = df_clean[df_clean['dob_format'] != 'YYYY-MM-DD (ISO)']
+if not non_iso.empty:
+    print(f'\nNon-ISO dates ({len(non_iso)} rows):')
+    display(non_iso[['_id', 'full_name', 'date_of_birth', 'dob_format']])
+
+# ── Remediation: normalize all dates to ISO YYYY-MM-DD ────────────────────────
+def normalize_date(val):
+    """Try multiple formats; return ISO string or NaT."""
+    if pd.isna(val):
+        return pd.NaT
+    for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%d-%m-%Y', '%m/%d/%Y'):
+        try:
+            return datetime.strptime(str(val), fmt).date().isoformat()
+        except ValueError:
+            continue
+    return pd.NaT  # Could not parse → flag as missing
+
+df_clean['date_of_birth_norm'] = df_clean['date_of_birth'].apply(normalize_date)
+
+# How many could NOT be parsed?
+still_broken = df_clean['date_of_birth_norm'].isna().sum()
+print(f'Dates successfully normalized: {(~df_clean["date_of_birth_norm"].isna()).sum()}')
+print(f'Dates still unparseable (NaT): {still_broken}')
+
+
+## 2c - Invalid / Impossible Values
+# ── Negative credit_history_months ────────────────────────────────────────────
+neg_chm = df_clean[pd.to_numeric(df_clean['credit_history_months'], errors='coerce') < 0]
+print(f'Negative credit_history_months: {len(neg_chm)}')
+if not neg_chm.empty:
+    display(neg_chm[['_id', 'full_name', 'credit_history_months']])
+
+# ── Negative annual_income ─────────────────────────────────────────────────────
+neg_income = df_clean[pd.to_numeric(df_clean['annual_income'], errors='coerce') < 0]
+print(f'Negative annual_income: {len(neg_income)}')
+if not neg_income.empty:
+    display(neg_income[['_id', 'full_name', 'annual_income']])
+
+# ── Negative savings_balance ────────────────────────────────────────────────────
+neg_sav = df_clean[pd.to_numeric(df_clean['savings_balance'], errors='coerce') < 0]
+print(f'Negative savings_balance: {len(neg_sav)}')
+if not neg_sav.empty:
+    display(neg_sav[['_id', 'full_name', 'savings_balance']])
+
+# ── Impossible ages (< 18 or > 120 years) ─────────────────────────────────────
+today = date.today()
+
+def calc_age(dob_str):
+    try:
+        dob = date.fromisoformat(str(dob_str))
+        return (today - dob).days // 365
+    except Exception:
+        return np.nan
+
+df_clean['age'] = df_clean['date_of_birth_norm'].apply(calc_age)
+
+impossible_age = df_clean[(df_clean['age'] < 18) | (df_clean['age'] > 120)]
+print(f'Impossible ages (< 18 or > 120): {len(impossible_age)}')
+if not impossible_age.empty:
+    display(impossible_age[['_id', 'full_name', 'date_of_birth', 'date_of_birth_norm', 'age']])
+
+# ── Debt-to-income ratio > 1.0 (100%) ─────────────────────────────────────────
+dti_over = df_clean[pd.to_numeric(df_clean['debt_to_income'], errors='coerce') > 1.0]
+print(f'DTI > 1.0: {len(dti_over)}')
+if not dti_over.empty:
+    display(dti_over[['_id', 'full_name', 'debt_to_income']])
+
+## 2d - Inconsistent Categorical Coding (gender)
+# What values exist?
+print('gender — raw value counts:')
+print(df_clean['gender'].value_counts(dropna=False))
+
+# ── Remediation: normalize to 'Male' / 'Female' / 'Other' / 'Unknown' ─────────
+GENDER_MAP = {
+    # Male variants
+    'male': 'Male', 'm': 'Male', 'man': 'Male',
+    # Female variants
+    'female': 'Female', 'f': 'Female', 'fem.': 'Female', 'woman': 'Female',
+    # Non-binary / other
+    'non-binary': 'Other', 'nonbinary': 'Other', 'nb': 'Other',
+    'prefer not to say': 'Unknown',
+}
+
+def normalize_gender(val):
+    if pd.isna(val):
+        return 'Unknown'
+    return GENDER_MAP.get(str(val).strip().lower(), val)  # keep original if not in map
+
+df_clean['gender_norm'] = df_clean['gender'].apply(normalize_gender)
+
+print('gender — normalized value counts:')
+print(df_clean['gender_norm'].value_counts(dropna=False))
+
+# Show rows that still could not be mapped
+still_weird = df_clean[~df_clean['gender_norm'].isin(['Male', 'Female', 'Other', 'Unknown'])]
+if not still_weird.empty:
+    print('\nRows with unrecognized gender value:')
+    display(still_weird[['_id', 'full_name', 'gender', 'gender_norm']])
+
+#3 Summary
+summary = {
+    'Total rows (original)':          len(df),
+    'Exact duplicates removed':       len(df) - len(df.drop_duplicates()),
+    'SSN logical duplicates found':   len(df[df.duplicated(subset=['ssn'], keep=False)]),
+    'Name+DOB logical dupes found':   len(df[df.duplicated(subset=['full_name','date_of_birth'], keep=False)]),
+    'Rows after dedup':               len(df_clean),
+    'Non-ISO date formats found':     (df_clean['dob_format'] != 'YYYY-MM-DD (ISO)').sum(),
+    'Dates unparseable (NaT)':        df_clean['date_of_birth_norm'].isna().sum(),
+    'Impossible ages':                len(impossible_age),
+    'Negative credit_history_months': len(neg_chm),
+    'Negative annual_income':         len(neg_income),
+    'DTI > 1.0':                      len(dti_over),
+    'Gender values before norm':      df_clean['gender'].nunique(),
+    'Gender values after norm':       df_clean['gender_norm'].nunique(),
+}
+
+summary_df = pd.DataFrame.from_dict(summary, orient='index', columns=['Count'])
+display(summary_df)
+
