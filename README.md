@@ -1,12 +1,19 @@
 # DEGO Project - Team 12
+
 ## Team Members
-- Afonso Joao - 72008
-- Liane Kpocheme - 73516
-- Rita Cunha - 56704
-- Guilherme Carvalho - 70364
-- Luca Benedict Illies - 70170
+| Name | Student ID | Role |
+|---|---|---|
+| Luca Benedict Illies | 70170 | Data Engineer |
+| Afonso João | 72008 | Data Engineer |
+| Liane Kpocheme | 73516 | Data Scientist |
+| Rita Cunha | 56704 | Governance Officer |
+| Guilherme Carvalho | 70364 | Product Lead |
+
 ## Project Description
 DEGO 2606 Group Project – Credit Application Governance Analysis
+
+## Executive Summary
+NovaCred's automated credit decision system was audited across three dimensions: data quality, algorithmic fairness, and privacy & governance compliance. The raw dataset contained 502 records with 11 categories of data quality issues, which were resolved to produce a clean 500-record dataset. Bias analysis revealed a significant gender gap — female applicants are approved at a rate of 50.6% versus 66.0% for male applicants, yielding a Disparate Impact (DI) ratio of 0.77, below the four-fifths (0.80) threshold and indicating potential disparate impact. ZIP code was confirmed as a gender proxy. Young female applicants (18–30) face the steepest disadvantage, with an approval rate of only 34.1%. On the governance side, the dataset contained multiple unprotected PII fields; pseudonymization, hashing, and MongoDB-based governance controls were implemented to address GDPR and EU AI Act obligations.
 
 ## 1. Data Engineering (Luca Illies & Afonso João)
 
@@ -48,13 +55,13 @@ The accuracy dimension was assessed by checking whether decision fields were int
 To address the identified issues, several remediation procedures were implemented:
 - Schema normalization to ensure all records follow a consistent structure
 - Date standardization converting all birth dates to ISO format (YYYY-MM-DD)
-- Categorical normalization mapping all gender encodings to Male, Female, or Unknown
-- Variable harmonization merging the two income fields (annual_income and annual_salary) into a single canonical field
+- Categorical normalization mapping all gender encodings to `Male`, `Female`, or `Unknown`
+- Variable harmonization merging the two income fields (`annual_income` and `annual_salary`) into a single canonical field
 - Data type correction converting annual income to numeric format
 - Duplicate removal based on repeated application IDs, removing redundant records while preserving one canonical entry per application
 - Duplicate SSN flagging for manual review, as identical SSNs across different applicants may indicate fraud or data integration errors requiring human judgment
-- Field validation to detect malformed or empty identifiers, with invalid values recoded as missing (NaN) for downstream handling
-- Validity remediation setting impossible or anomalous numeric values (negative credit history months, debt-to-income ratio above 1.0, negative savings balance) to NaN
+- Field validation to detect malformed or empty identifiers, with invalid values recoded as missing (`NaN`) for downstream handling
+- Validity remediation setting impossible or anomalous numeric values (negative credit history months, debt-to-income ratio above 1.0, negative savings balance) to `NaN`
 
 Nested JSON records were flattened into a tabular structure to enable easier analysis and validation. Schema normalization was also applied to ensure all records shared a consistent top-level structure.
 
@@ -254,7 +261,19 @@ Together, these measures help ensure that automated credit systems are transpare
 The analysis conducted across data engineering, bias detection, and privacy governance highlights the importance of strong oversight in automated credit decision systems. Data quality issues, fairness concerns, and privacy risks can significantly impact the reliability and legitimacy of algorithmic decision-making. By implementing improved data validation processes, continuous fairness monitoring, and robust privacy protections, NovaCred can strengthen both the accuracy and accountability of its credit approval system. These measures not only mitigate operational and regulatory risks but also support the development of transparent, fair, and compliant financial technologies.
 
 ## Structure
-- `data/` – Dataset files
-- `notebooks/` – Jupyter analysis notebooks
-- `src/` – Python source code
-- `reports/` – Final deliverables
+```
+dego-project-team12/
+├── README.md
+├── data/
+│   ├── raw_credit_applications.json
+│   ├── cleaned_credit_applications.json
+│   └── cleaned_credit_applications.csv
+├── notebooks/
+│   ├── 01-data-quality.ipynb
+│   ├── 02-bias-analysis.ipynb
+│   └── 03-privacy-demo.ipynb    
+├── src/
+│   ├── __init__.py
+│   └── fairness_utils.py
+├── presentation/
+```
