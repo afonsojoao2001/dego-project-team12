@@ -9,6 +9,10 @@
 | Rita Cunha | 56704 | Governance Officer |
 | Guilherme Carvalho | 70364 | Product Lead |
 
+## Presentation
+
+[▶ Watch our video presentation](https://www.youtube.com/watch?v=yJDlzpW1eps)
+
 ## Project Description
 DEGO 2606 Group Project – Credit Application Governance Analysis
 
