@@ -268,10 +268,6 @@ Together, these measures help ensure that automated credit systems are transpare
 
 The analysis conducted across data engineering, bias detection, and privacy governance highlights the importance of strong oversight in automated credit decision systems. Data quality issues, fairness concerns, and privacy risks can significantly impact the reliability and legitimacy of algorithmic decision-making. By implementing improved data validation processes, continuous fairness monitoring, and robust privacy protections, NovaCred can strengthen both the accuracy and accountability of its credit approval system. These measures not only mitigate operational and regulatory risks but also support the development of transparent, fair, and compliant financial technologies.
 
-
-
-
-
 ## Structure
 - `data/` – Dataset files
 - `notebooks/` – Jupyter analysis notebooks
