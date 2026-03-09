@@ -14,7 +14,7 @@
 [▶ Watch our video presentation](https://www.youtube.com/watch?v=yJDlzpW1eps)
 
 ## Project Description
-DEGO 2606 Group Project – Credit Application Governance Analysis
+DEGO 2026 Group Project – Credit Application Governance Analysis
 
 ## Executive Summary
 NovaCred's automated credit decision system was audited across three dimensions: data quality, algorithmic fairness, and privacy & governance compliance. The raw dataset contained 502 records with 11 categories of data quality issues, which were resolved to produce a clean 500-record dataset. Bias analysis revealed a significant gender gap — female applicants are approved at a rate of 50.6% versus 66.0% for male applicants, yielding a Disparate Impact (DI) ratio of 0.77, below the four-fifths (0.80) threshold and indicating potential disparate impact. ZIP code was confirmed as a gender proxy. Young female applicants (18–30) face the steepest disadvantage, with an approval rate of only 34.1%. On the governance side, the dataset contained multiple unprotected PII fields; pseudonymization, hashing, and MongoDB-based governance controls were implemented to address GDPR and EU AI Act obligations.
@@ -232,7 +232,7 @@ The implemented privacy and governance framework significantly reduces re-identi
 
 ---
 
-## 4. Product Leader Recomendations (Guilherme Carvalho)
+## 4. Product Leader Recommendations (Guilherme Carvalho)
 
 # 4.1. Objective
 
