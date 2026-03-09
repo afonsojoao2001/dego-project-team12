@@ -1,10 +1,10 @@
 # DEGO Project - Team 12
 ## Team Members
-- Afonso Joao
-- Liane Kpocheme
-- Rita Cunha
-- Guilherme Carvalho
-- Luca Benedict Illies
+- Afonso Joao - 72008
+- Liane Kpocheme - 73516
+- Rita Cunha - 56704
+- Guilherme Carvalho - 70364
+- Luca Benedict Illies - 70170
 ## Project Description
 DEGO 2606 Group Project – Credit Application Governance Analysis
 
@@ -57,11 +57,6 @@ To address the identified issues, several remediation procedures were implemente
 - Validity remediation setting impossible or anomalous numeric values (negative credit history months, debt-to-income ratio above 1.0, negative savings balance) to NaN
 
 Nested JSON records were flattened into a tabular structure to enable easier analysis and validation. Schema normalization was also applied to ensure all records shared a consistent top-level structure.
-
-# 1.4. Final Dataset
-
-After applying cleaning and validation procedures, the final dataset contained:
-
 
 # 1.4. Final Dataset
 
