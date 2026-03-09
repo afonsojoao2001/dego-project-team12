@@ -65,8 +65,7 @@ The resulting dataset provides a clean, standardized, and validated foundation f
 
 # 2.1. Objective
 
-The bias analysis aimed to evaluate whether the credit approval decisions exhibit systematic disparities across demographic groups, particularly with respect to gender and age. Detecting such disparities is essential in financial decision systems, as discriminatory outcomes can violate fairness principles and regulatory requirements.
-The analysis applied several statistical techniques to assess potential bias, including approval rate comparisons, disparate impact metrics, hypothesis testing, and proxy variable detection.
+The bias analysis notebook focuses on detecting potential bias an discrimination in NovaCred's historical credit application data across four analytical dimensions: gender disparate impact, age-based bias, proxy discrimination, and interaction effects. All findings are supported by appropriate statistical tests (z-test, chi-square, ANOVA, & Demographic Parity Difference).
 
 # 2.2. Gender Disparities in Credit Approval
 
@@ -77,44 +76,26 @@ Approval outcomes were analyzed by gender to evaluate whether male and female ap
 | Male   | 66.0%         |
 | Female | 50.6%         |
 
-To quantify potential discrimination, the Disparate Impact (DI) ratio was calculated:
-DI = 0.767
-
-According to the widely used four-fifths rule, a DI value below 0.80 indicates potential discrimination. The observed value therefore suggests a significant disparity in approval outcomes.
-
-A two-proportion z-test was conducted to evaluate statistical significance:
-p-value = 0.0002
-
-Since the p-value is well below the significance threshold (p < 0.05), the difference in approval rates is statistically significant, indicating that female applicants were significantly less likely to receive loan approval.
+Female applicants are approved significantly less often than male
+applicants
 
 # 2.3. Age-Based Bias
 
 The relationship between applicant age and approval decisions was examined using correlation analysis.
 
-Correlation coefficient:
-r = 0.122
-
-This indicates a weak positive relationship, suggesting that older applicants are slightly more likely to be approved. Conversely, younger applicants—particularly those aged 18–30—experienced lower approval rates.
-
-Although the effect size is small, the results indicate that age may influence credit approval outcomes.
+The 18-30 age group faces a severe approval disadvantage (41.5%)
 
 # 2.4. Proxy Discrimination Analysis
 
 The analysis also examined whether certain variables indirectly encode protected characteristics.
-
-ZIP codes were analyzed as potential proxy variables, since geographic data can sometimes correlate strongly with demographic attributes.
-
-ZIP codes were grouped into regional clusters based on their prefixes.
 
 | Region      | Approval Rate |
 | ----------- | ------------- |
 | New York    | 64.3%         |
 | Los Angeles | 51.8%         |
 
-The calculated disparate impact ratio was:
-DI = 0.805
-
-Although slightly above the four-fifths threshold, the difference suggested possible indirect discrimination and warranted further analysis.
+Female and male applicants show virtually identical financial profiles, ruling out legitimate financial differences as an explanation for the gender gap.
+While the 18-30 age group shows systematically lower income, shorter credit history, and lower savings, these financial differences reflect realistic life-stage patterns rather than proxy discrimination.
 
 # 2.5. Gender Distribution by Region
 
@@ -125,12 +106,7 @@ A chi-square test was conducted to evaluate whether gender distribution differed
 | Los Angeles | 93.4%  | 6.6%  |
 | New York    | 11.2%  | 88.8% |
 
-Chi-square test results:
-
-χ² = 318.25
-p < 0.0001
-
-These results indicate a very strong association between ZIP code and gender, meaning that geographic variables can function as proxy variables for protected attributes. If ZIP codes were used in a credit scoring model, the model could unintentionally discriminate based on gender.
+ZIP code is confirmed as a gender proxy, with Los Angeles being 93.4% female and New York 88.8% male.
 
 # 2.6. Intersectional Bias
 
@@ -143,19 +119,16 @@ A chi-square test was used to evaluate the interaction between gender and age gr
 | Female (18–30) | 34.1%         |
 | Male (18–30)   | 50.0%         |
 
-Test results:
-χ² = 23.5764
-p = 0.0014
 
-The results show a statistically significant interaction effect, indicating that young female applicants experience the lowest approval rates.
+The results show a statistically significant interaction effect, indicating that young female applicants (18-30) face the most severe compounding disadvantage of any subgroup, with an approval rate of only 34.1%.
 
 # 2.7. Key Findings
 
 The bias analysis revealed several important fairness concerns:
-- Female applicants experienced significantly lower approval rates than male applicants.
-- Younger applicants showed slightly lower approval probabilities.
-- ZIP codes act as proxy variables for gender, introducing indirect discrimination risks.
-- Intersectional bias was observed, with young female applicants being the most disadvantaged group.
+- Remove ZIP code as a model input to eliminate confirmed gender proxy discrimination
+- Audit the approval decision process for gender bias, as financial profiles alone cannot explain the observed gap
+- Introduce alternative creditworthiness metrics for the 18-30 age group to avoid systematic exclusion from credit access
+- Implement continuous bias monitoring with automatic alerts when DI ratios approach the 0.8 threshold
 
 These findings highlight the importance of implementing fairness monitoring and bias mitigation strategies in automated credit decision systems.
 
