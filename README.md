@@ -6,47 +6,62 @@
 - Guilherme Carvalho
 - Luca Benedict Illies
 ## Project Description
+DEGO 2606 Group Project – Credit Application Governance Analysis
 
 ## 1. Data Engineering (Luca Illies & Afonso João)
 
 # 1.1. Objective
 
-The data engineering phase aimed to evaluate and improve the quality, consistency, and reliability of the raw credit application dataset before performing statistical and governance analyses. Because automated decision systems depend heavily on high-quality input data, identifying and resolving data quality issues is a critical step to ensure accurate and fair outcomes.
+The data engineering phase aimed to assess and improve the quality of NovaCred's raw credit application data before it was used for bias analysis and privacy governance assessment. This involved identifying structural inconsistencies, missing values, invalid formats, duplicate identifiers, and data type mismatches, then applying cleaning and standardization steps to produce a reliable, analysis-ready dataset. Because automated credit decisions depend on accurate and consistent input data, this step was essential to support trustworthy downstream analysis and reduce the risk of misleading or unfair conclusions.
 
 # 1.2. Data Quality Audit
 
 A comprehensive data quality audit was conducted across multiple dimensions commonly used in data governance frameworks:
-- Structural consistency → verifying that all records follow the same schema
-- Completeness → identifying missing or blank values
+- Structural consistency → verifying that all records followed the same schema
+- Completeness → identifying missing, null, or blank values
 - Consistency → detecting formatting inconsistencies across categorical fields
-- Uniqueness → identifying duplicate records and identifiers
+- Uniqueness → identifying duplicate records and repeated identifiers
 - Validity → ensuring values fall within reasonable and logically valid ranges
+- Accuracy → checking whether values are plausible in real-world context and coherent with related fields (e.g. credit history exceeding what is possible given the applicant’s age)
 
-The dataset initially contained 502 credit application records with several structural and formatting inconsistencies.
+The dataset initially contained 502 credit application records. The following issues were identified: 
 
 | Issue                                           | Count |
 | ----------------------------------------------- | ----- |
 | Non-ISO date-of-birth formats                   | 157   |
 | Inconsistent gender encodings                   | 114   |
-| Annual income stored as text instead of numeric | 8     |
+| Annual income stored as string                  | 8     |
 | Empty email fields                              | 7     |
-| Duplicate application IDs                       | 4     |
 | Duplicate SSN values                            | 6     |
+| Duplicate application IDs                       | 4     |
+| Invalid email format                            | 4     |
+| Negative credit history                         | 2     |
+| Empty string ZIP code                           | 1     |
+| Debt-to-income ratio above 1.0                  | 1     |
+| Negative savings balance                        | 1     |
 
-Additional validation checks also identified formatting problems in fields such as ZIP codes, IP addresses, and Social Security Numbers, as well as inconsistencies in financial variables and optional attributes.
+Additionally, a schema drift check identified that annual income was recorded under two different field names (`annual_income` and `annual_salary`) across 5 records. These were merged into a single canonical field prior to analysis.
+The accuracy dimension was assessed by checking whether decision fields were internally coherent (approved records carried interest rates and loan amounts, while rejected records carried rejection reasons) and whether credit history months exceeded each applicant’s legal age. No issues were detected in either check.
 
 # 1.3. Data Cleaning and Standardization
 
 To address the identified issues, several remediation procedures were implemented:
 - Schema normalization to ensure all records follow a consistent structure
-- Date standardization converting all birth dates to ISO format
-- Categorical normalization standardizing gender encoding
-- Data type correction converting financial variables to numeric format
-- Duplicate removal based on application IDs and SSN values
-- Field validation for identifiers such as email, ZIP code, IP address, and SSN
-- Variable harmonization merging inconsistent financial attributes into a canonical income variable
+- Date standardization converting all birth dates to ISO format (YYYY-MM-DD)
+- Categorical normalization mapping all gender encodings to Male, Female, or Unknown
+- Variable harmonization merging the two income fields (annual_income and annual_salary) into a single canonical field
+- Data type correction converting annual income to numeric format
+- Duplicate removal based on repeated application IDs, removing redundant records while preserving one canonical entry per application
+- Duplicate SSN flagging for manual review, as identical SSNs across different applicants may indicate fraud or data integration errors requiring human judgment
+- Field validation to detect malformed or empty identifiers, with invalid values recoded as missing (NaN) for downstream handling
+- Validity remediation setting impossible or anomalous numeric values (negative credit history months, debt-to-income ratio above 1.0, negative savings balance) to NaN
 
-Nested JSON records were flattened into a tabular structure to enable easier analysis and validation.
+Nested JSON records were flattened into a tabular structure to enable easier analysis and validation. Schema normalization was also applied to ensure all records shared a consistent top-level structure.
+
+# 1.4. Final Dataset
+
+After applying cleaning and validation procedures, the final dataset contained:
+
 
 # 1.4. Final Dataset
 
