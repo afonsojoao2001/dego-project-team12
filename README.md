@@ -61,11 +61,13 @@ Nested JSON records were flattened into a tabular structure to enable easier ana
 # 1.4. Final Dataset
 
 After applying cleaning and validation procedures, the final dataset contained:
-| -------------------------- | -------- |
-| Records                    | 500      |
-| Attributes                 | 25       |
-| Duplicate entries          | 0        |
-| Structural inconsistencies | resolved |
+
+| Summary                    | Value      |
+|----------------------------|------------|
+| Records                    | 500        |
+| Attributes                 | 25         |
+| Duplicate entries          | 0          |
+| Structural inconsistencies | Resolved   |
 
 The resulting dataset provides a clean, standardized, and validated foundation for the subsequent bias analysis and privacy governance assessment.
 
